@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ölprovning Mall</title>
+<style>
+  :root{
+    --ink:#111111;
+    --bg:#ffffff;
+    --bg2:#ffffff;
+    --angle:180deg;
+    --muted:#666;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#e9e9e9;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+
+  .toolbar{
+    display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;
+    padding:12px 12px 6px;
+  }
+  button{border:1px solid var(--ink);background:#fff;border-radius:10px;padding:8px 10px;cursor:pointer}
+  button.primary{background:#111;color:#fff}
+
+  /* Color panel: same width as sheet */
+  .panelWrap{display:flex;justify-content:center;padding:0 12px 10px}
+  .panel{
+    width:min(1100px,100%);
+    display:flex;flex-wrap:wrap;gap:14px;
+    align-items:flex-start;              /* top align */
+    justify-content:left;              /* left content */
+    padding:12px;border:2px solid var(--ink);border-radius:16px;background:#fff;
+  }
+  .g{display:flex;flex-direction:column;gap:6px;align-items:center}
+  label{font-size:12px;color:#333}
+  input[type="text"], input[type="number"]{
+    border:1px solid #bdbdbd;border-radius:10px;padding:7px 8px;font:inherit;font-size:14px;
+    min-width:150px;text-align:center
+  }
+  input[type="color"]{width:44px;height:38px;border:none;background:transparent;padding:0;cursor:pointer}
+  .hint{font-size:12px;color:#444;text-align:center;flex-basis:100%}
+
+  .page{display:flex;justify-content:center;padding:12px}
+  .capture{width:min(1100px,100%);display:flex;flex-direction:column;gap:10px}
+
+  .metaCard{
+    background:#fff;border:2px solid var(--ink);border-radius:16px;overflow:hidden;
+    box-shadow:0 10px 28px rgba(0,0,0,.12);padding:10px 12px;
+  }
+  .metaRow{
+    display:grid;
+    grid-template-columns:170px 1fr;
+    gap:10px;
+    align-items:center;
+  }
+  .metaLabel{font-weight:700;color:var(--ink)}
+  .metaInput{
+    width:100%;border:1px solid #bdbdbd;border-radius:10px;padding:8px;font:inherit;
+    background:#fff;color:var(--ink)
+  }
+
+  .sheet{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .card{
+    background:linear-gradient(var(--angle), var(--bg), var(--bg2));
+    border:2px solid var(--ink);border-radius:16px;overflow:hidden;
+    box-shadow:0 10px 28px rgba(0,0,0,.12)
+  }
+  .top{display:flex;justify-content:center;align-items:center;padding:14px;border-bottom:2px solid var(--ink)}
+  .circle{
+    width:128px;height:128px;border:2px solid var(--ink);border-radius:999px;display:flex;align-items:center;justify-content:center;
+    font-weight:700;font-size:64px;color:#4a4a4a;letter-spacing:2px;background:transparent
+  }
+  .grid{display:grid;grid-template-columns:58px 1fr}
+  .vhead{
+    writing-mode:vertical-rl;transform:rotate(180deg);
+    border-right:2px solid var(--ink);padding:10px 0;text-align:center;font-weight:700;font-size:22px;
+    user-select:none;color:var(--ink)
+  }
+  .section{border-bottom:2px solid var(--ink);padding:10px 12px}
+  .grid .vhead:last-of-type,.grid .section:last-of-type{border-bottom:none}
+  .label{font-weight:700;font-size:14px;margin:6px 0 4px;color:var(--ink)}
+  textarea,input[type="text"].field{
+    width:100%;border:1px solid #bdbdbd;border-radius:10px;padding:8px;font:inherit;
+    background:rgba(255,255,255,.92);color:var(--ink)
+  }
+  textarea{min-height:66px;resize:vertical}
+  .opts{display:flex;gap:18px;flex-wrap:wrap;align-items:center;margin:6px 0 8px}
+  .opt{display:flex;gap:8px;align-items:center;cursor:pointer;user-select:none}
+  .box{width:18px;height:18px;border:2px solid var(--ink);border-radius:4px;background:#fff;display:inline-block}
+  .box.on{background:var(--ink)}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px;letter-spacing:.4px}
+
+  .intGrid{
+    border:1px solid var(--ink);border-radius:10px;overflow:hidden;display:grid;grid-template-columns:110px repeat(12,1fr);
+    margin-top:6px;background:rgba(255,255,255,.65)
+  }
+  .intGrid .hcell{padding:6px 8px;border-right:1px solid var(--ink);background:rgba(250,250,250,.9);font-weight:700;font-size:12px}
+  .intGrid .n{display:flex;align-items:center;justify-content:center;border-right:1px solid var(--ink);background:rgba(250,250,250,.9);font-size:11px}
+  .rowname{padding:6px 8px;border-top:1px solid var(--ink);border-right:1px solid var(--ink);font-weight:700;font-size:12px;background:rgba(255,255,255,.9)}
+  .cell{border-top:1px solid var(--ink);border-right:1px solid var(--ink);display:flex;align-items:center;justify-content:center;padding:6px}
+  .dot{width:14px;height:14px;border:2px solid var(--ink);border-radius:3px;background:#fff;cursor:pointer}
+  .dot.on{background:var(--ink)}
+  .intNote{display:flex;justify-content:flex-end;color:var(--muted);font-size:12px;margin-top:4px}
+  .lines input{margin-top:6px}
+  .tiny{font-size:11px;color:#555}
+
+  @media print{
+    body{background:#fff}
+    .toolbar,.panelWrap{display:none}
+    .sheet{gap:10px}
+    .card,.metaCard{box-shadow:none}
+  }
+</style>
+</head>
+<body>
+  <div class="toolbar">
+    <button class="primary" id="exportImg">Spara hela bladet som bild</button>
+    <span class="mono" style="color:#333">Tips: För PDF, använd Skriv ut i webbläsaren.</span>
+  </div>
+
+  <div class="panelWrap">
+    <div class="panel" aria-label="Färgpanel">
+      <div class="g">
+        <label for="hexInk">Linjer/Text (HEX)</label>
+        <input id="hexInk" type="text" value="#111111" placeholder="#111111">
+        <input id="pickInk" type="color" value="#111111" title="Välj färg">
+      </div>
+
+      <div class="g">
+        <label for="hexBg1">Bakgrund BG1 (HEX)</label>
+        <input id="hexBg1" type="text" value="#ffffff" placeholder="#ffffff">
+        <input id="pickBg1" type="color" value="#ffffff" title="Välj färg">
+        <div class="tiny">Enfärgat om BG2 är samma.</div>
+      </div>
+
+      <div class="g">
+        <label for="hexBg2">Gradient BG2 (HEX)</label>
+        <input id="hexBg2" type="text" value="#ffffff" placeholder="#ffffff">
+        <input id="pickBg2" type="color" value="#ffffff" title="Välj färg">
+      </div>
+
+      <div class="g">
+        <label for="angle">Gradient vinkel</label>
+        <input id="angle" type="number" min="0" max="360" value="180" style="min-width:110px">
+        <div class="tiny">0–360°</div>
+      </div>
+
+      <div class="g">
+        <button id="resetTheme">Återställ</button>
+      </div>
+
+      <div class="hint">HEX måste vara #RRGGBB. Ändringar sker direkt.</div>
+    </div>
+  </div>
+
+  <div class="page">
+    <div class="capture" id="capture">
+      <div class="metaCard">
+        <div class="metaRow">
+          <div class="metaLabel">Deltagare (namn):</div>
+          <input class="metaInput" id="names" type="text" placeholder="t.ex. Tove, Cha, ..." autocomplete="off">
+        </div>
+      </div>
+
+      <div class="sheet">
+        <div class="card" data-form="01"></div>
+        <div class="card" data-form="02"></div>
+        <div class="card" data-form="03"></div>
+        <div class="card" data-form="04"></div>
+      </div>
+    </div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script>
+  const isHex = (s)=> /^#([0-9a-fA-F]{6})$/.test((s||"").trim());
+  const setVar = (name,val)=> document.documentElement.style.setProperty(name,val);
+  const persistTheme = (t)=> localStorage.setItem("theme_v3", JSON.stringify(t));
+
+  function applyThemeRealtime(){
+    const ink = document.getElementById("hexInk").value.trim();
+    const bg1 = document.getElementById("hexBg1").value.trim();
+    const bg2 = document.getElementById("hexBg2").value.trim();
+    const angle = Number(document.getElementById("angle").value);
+
+    if(isHex(ink)) setVar("--ink", ink);
+    if(isHex(bg1)) setVar("--bg", bg1);
+    if(isHex(bg2)) setVar("--bg2", bg2);
+    if(angle>=0 && angle<=360) setVar("--angle", angle + "deg");
+
+    if(isHex(ink)) document.getElementById("pickInk").value = ink;
+    if(isHex(bg1)) document.getElementById("pickBg1").value = bg1;
+    if(isHex(bg2)) document.getElementById("pickBg2").value = bg2;
+
+    if(isHex(ink) && isHex(bg1) && isHex(bg2) && angle>=0 && angle<=360){
+      persistTheme({ink,bg1,bg2,angle});
+    }
+  }
+
+  function resetTheme(){
+    document.getElementById("hexInk").value="#111111";
+    document.getElementById("hexBg1").value="#ffffff";
+    document.getElementById("hexBg2").value="#ffffff";
+    document.getElementById("pickInk").value="#111111";
+    document.getElementById("pickBg1").value="#ffffff";
+    document.getElementById("pickBg2").value="#ffffff";
+    document.getElementById("angle").value=180;
+    setVar("--ink","#111111");
+    setVar("--bg","#ffffff");
+    setVar("--bg2","#ffffff");
+    setVar("--angle","180deg");
+    localStorage.removeItem("theme_v3");
+  }
+
+  function loadTheme(){
+    try{
+      const t = JSON.parse(localStorage.getItem("theme_v3")||"null");
+      if(!t) return;
+      if(isHex(t.ink)&&isHex(t.bg1)&&isHex(t.bg2)&&t.angle>=0&&t.angle<=360){
+        document.getElementById("hexInk").value=t.ink;
+        document.getElementById("hexBg1").value=t.bg1;
+        document.getElementById("hexBg2").value=t.bg2;
+        document.getElementById("pickInk").value=t.ink;
+        document.getElementById("pickBg1").value=t.bg1;
+        document.getElementById("pickBg2").value=t.bg2;
+        document.getElementById("angle").value=t.angle;
+      }
+    }catch(e){}
+  }
+
+  // Persist names (input is already visible in export)
+  const names = document.getElementById("names");
+  names.value = localStorage.getItem("names_v2") || "";
+  names.addEventListener("input", ()=> localStorage.setItem("names_v2", names.value || ""));
+
+  function formTemplate(n){
+    return `
+      <div class="top"><div class="circle">${n}</div></div>
+      <div class="grid">
+        <div class="vhead">1. Utseende</div>
+        <div class="section">
+          <div class="label">1.1 Färg:</div>
+          <textarea class="field"></textarea>
+          <div class="label">1.2 Klarhet:</div>
+          <div class="opts" data-single="klarhet">
+            <div class="opt" data-v="klar"><span class="box"></span><span class="mono">KLAR</span></div>
+            <div class="opt" data-v="oklar"><span class="box"></span><span class="mono">OKLAR</span></div>
+            <div class="opt" data-v="grumlig"><span class="box"></span><span class="mono">GRUMLIG</span></div>
+          </div>
+          <div class="label">1.3 Skumbeskrivning:</div>
+          <textarea class="field"></textarea>
+        </div>
+
+        <div class="vhead">2. Doft</div>
+        <div class="section">
+          <div class="label">2.1 Intensitet:</div>
+          <div class="opts" data-single="doftint">
+            <div class="opt" data-v="liten"><span class="box"></span><span class="mono">LITEN</span></div>
+            <div class="opt" data-v="medel"><span class="box"></span><span class="mono">MEDEL</span></div>
+            <div class="opt" data-v="stor"><span class="box"></span><span class="mono">STOR</span></div>
+          </div>
+          <div class="label">2.2 Aromer:</div>
+          <textarea class="field"></textarea>
+        </div>
+
+        <div class="vhead">3. Smak</div>
+        <div class="section">
+          <div class="label">3.1 Intensitet:</div>
+          <div class="intGrid">
+            <div class="hcell"></div>
+            ${Array.from({length:12},(_,i)=>`<div class="n">${i+1}</div>`).join("")}
+            ${["BESKA","FYLLIGHET","SÖTMA"].map(name=>`
+              <div class="rowname mono">${name}</div>
+              ${Array.from({length:12},(_,i)=>`<div class="cell"><div class="dot" data-row="${name}" data-val="${i+1}"></div></div>`).join("")}
+            `).join("")}
+          </div>
+          <div class="intNote mono">1 = LITEN&nbsp;&nbsp;&nbsp;12 = PÅTAGLIG</div>
+
+          <div class="label">3.2 Aromer:</div>
+          <textarea class="field"></textarea>
+          <div class="label">3.3 Övrigt:</div>
+          <textarea class="field"></textarea>
+        </div>
+
+        <div class="vhead">4. Produkt</div>
+        <div class="section" style="border-bottom:none">
+          <div class="label">4.1 Produktinformation:</div>
+          <div class="lines">
+            <input class="field" type="text" placeholder="DESTILL / BRYGGERI">
+            <input class="field" type="text" placeholder="DRYCK">
+            <input class="field" type="text" placeholder="ALK %">
+            <input class="field" type="text" placeholder="PRIS">
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function initCard(card){
+    card.innerHTML = formTemplate(card.dataset.form);
+
+    card.querySelectorAll("[data-single]").forEach(group=>{
+      group.dataset.value="";
+      group.querySelectorAll(".opt").forEach(opt=>{
+        opt.addEventListener("click",()=>{
+          const clicked = opt.dataset.v;
+          const current = group.dataset.value || "";
+          if(current === clicked){
+            group.dataset.value = "";
+            opt.querySelector(".box").classList.remove("on");
+            return;
+          }
+          group.querySelectorAll(".box").forEach(b=>b.classList.remove("on"));
+          opt.querySelector(".box").classList.add("on");
+          group.dataset.value = clicked;
+        });
+      });
+    });
+
+    const pick = {};
+    card.querySelectorAll(".dot").forEach(dot=>{
+      dot.addEventListener("click",()=>{
+        const row = dot.dataset.row;
+        const val = dot.dataset.val;
+        const current = pick[row] || "";
+        if(current === val){
+          pick[row] = "";
+          dot.classList.remove("on");
+          return;
+        }
+        pick[row]=val;
+        card.querySelectorAll('.dot[data-row="'+row+'"]').forEach(d=>d.classList.remove("on"));
+        dot.classList.add("on");
+      });
+    });
+  }
+
+  document.querySelectorAll(".card").forEach(initCard);
+
+  async function exportWholeSheet(){
+    const node = document.getElementById("capture");
+    const canvas = await html2canvas(node,{backgroundColor:"#ffffff",scale:2});
+    const a=document.createElement("a");
+    a.download="olprovning_01-04.png";
+    a.href=canvas.toDataURL("image/png");
+    a.click();
+  }
+  document.getElementById("exportImg").addEventListener("click",exportWholeSheet);
+
+  const bindHex = (hexId, pickId)=>{
+    const hex = document.getElementById(hexId);
+    const pick = document.getElementById(pickId);
+    hex.addEventListener("input", applyThemeRealtime);
+    hex.addEventListener("change", applyThemeRealtime);
+    pick.addEventListener("input", ()=>{
+      document.getElementById(hexId).value = pick.value;
+      applyThemeRealtime();
+    });
+  };
+  bindHex("hexInk","pickInk");
+  bindHex("hexBg1","pickBg1");
+  bindHex("hexBg2","pickBg2");
+  document.getElementById("angle").addEventListener("input", applyThemeRealtime);
+  document.getElementById("angle").addEventListener("change", applyThemeRealtime);
+  document.getElementById("resetTheme").addEventListener("click", resetTheme);
+
+  loadTheme();
+  applyThemeRealtime();
+</script>
+</body>
+</html>
