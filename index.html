@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Ölprovning Mall</title>
+<title>Ölprovning 4 Mall</title>
 <style>
   :root{
     --ink:#111111;
@@ -394,13 +394,49 @@
 
   async function exportWholeSheet(){
     const node = document.getElementById("capture");
-    const canvas = await html2canvas(node,{backgroundColor:"#ffffff",scale:2});
+
+    // First capture the node at good resolution
+    const shot = await html2canvas(node, {backgroundColor:"#ffffff", scale:2});
+
+    // A4 portrait canvas at ~96dpi (scaled up for quality)
+    const dpiScale = 2; // outputs 1588x2246
+    const a4w = 794 * dpiScale;
+    const a4h = 1123 * dpiScale;
+
+    const out = document.createElement("canvas");
+    out.width = a4w;
+    out.height = a4h;
+    const ctx = out.getContext("2d");
+
+    // White background
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0,0,a4w,a4h);
+
+    // Margins (in px at this dpiScale)
+    const margin = 32 * dpiScale;
+
+    const availW = a4w - margin*2;
+    const availH = a4h - margin*2;
+
+    // Scale captured image to fit within A4
+    const scale = Math.min(availW / shot.width, availH / shot.height);
+    const drawW = Math.round(shot.width * scale);
+    const drawH = Math.round(shot.height * scale);
+
+    // Center on page
+    const dx = Math.round((a4w - drawW)/2);
+    const dy = Math.round((a4h - drawH)/2);
+
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(shot, dx, dy, drawW, drawH);
+
     const a=document.createElement("a");
-    a.download="olprovning_01-04.png";
-    a.href=canvas.toDataURL("image/png");
+    a.download="olprovning_A4.png";
+    a.href=out.toDataURL("image/png");
     a.click();
   }
-  document.getElementById("exportImg").addEventListener("click",exportWholeSheet);
+  document.getElementById("exportImg").addEventListener("click", exportWholeSheet);
 
   const bindHex = (hexId, pickId)=>{
     const hex = document.getElementById(hexId);
